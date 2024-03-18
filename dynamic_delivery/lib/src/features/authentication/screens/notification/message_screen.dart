@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -10,6 +11,7 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
+  User? user = FirebaseAuth.instance.currentUser;
   late DocumentSnapshot? mostRecentDocument;
   String merchantName = '';
   String merchantPhone = '';
@@ -18,6 +20,7 @@ class _MessageScreenState extends State<MessageScreen> {
   String parcelQTY = '';
   String description = '';
   bool isLoading = true;
+
 
   @override
   void initState() {
@@ -38,6 +41,8 @@ class _MessageScreenState extends State<MessageScreen> {
 
         String? merchantId = mostRecentDocument?['Merchant_ID'];
         String? parcelId = mostRecentDocument?.id;
+
+
         print("-------$parcelId");
         print(mostRecentDocument?.data());
 
@@ -76,6 +81,21 @@ class _MessageScreenState extends State<MessageScreen> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void updateFirestore() async {
+    try {
+      QuerySnapshot agentsQuery = await FirebaseFirestore.instance.collection("Delivery-agents")
+          .where("Email", isEqualTo: user?.email!).get();
+
+      final String agentID = agentsQuery.docs.first.id;
+      await FirebaseFirestore.instance.collection('Parcels').doc(mostRecentDocument?.id).update({
+        'Agent-Id': agentID, // Add your new field here
+      });
+      print('Field added successfully');
+    } catch (e) {
+      print('Error adding field: $e');
     }
   }
 
@@ -160,7 +180,9 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    updateFirestore();
+                  },
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
                     shape: const RoundedRectangleBorder(),
