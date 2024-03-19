@@ -1,10 +1,13 @@
 import "dart:io";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:image_picker/image_picker.dart";
 import "package:line_awesome_flutter/line_awesome_flutter.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+import "../../../../../bottom_navigationbar.dart";
 import "../../../../constants/image_strings.dart";
 import "../../../../constants/strings.dart";
 import "../../../../repository/authentication_repository.dart";
@@ -21,6 +24,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker picker = ImagePicker();
   XFile? selectedImage;
+  final db = FirebaseFirestore.instance;
+  User? user = FirebaseAuth.instance.currentUser;
+
+  late String? agentID;
+  String ? name;
 
   @override
   void initState() {
@@ -28,18 +36,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadImageFromPreferences();
   }
 
+  Future<void> getData() async {
+    QuerySnapshot merchantQuery = await FirebaseFirestore.instance.collection("Delivery-agents")
+        .where("Email", isEqualTo: user?.email!).get();
 
+    if (merchantQuery.docs.isNotEmpty) {
+      agentID = merchantQuery.docs.first.id;
+
+    }
+    DocumentSnapshot first=merchantQuery.docs.first;
+    name=first['Name'];
+
+  }
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SignupController());
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(onPressed: () => Get.back(),
-            icon: const Icon(LineAwesomeIcons.angle_left)),
-        title: Text(tProfile, style: Theme
-            .of(context)
-            .textTheme
-            .headline4),
+        title: const Text('Profile'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle back button press
+            Get.off(const BottomNavBar());
+          },
+        ),
+        backgroundColor: tThemeMain,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -85,11 +107,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(controller.name.text, style: Theme
-                  .of(context)
-                  .textTheme
-                  .headline4),
-              Text(controller.email.text, style: Theme
+              FutureBuilder(
+                future: getData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: tThemeMain,),
+                    );
+                  } else {
+                    return
+                      Text(name.toString(), style: Theme
+                          .of(context)
+                          .textTheme
+                          .headline4);
+                  }
+
+                }, ),
+              Text(user!.email.toString(), style: Theme
                   .of(context)
                   .textTheme
                   .bodyText2),
@@ -106,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       side: BorderSide.none,
                       shape: const StadiumBorder()),
                   child: const Text(
-                      tEditProfile, style: TextStyle(color: Colors.white)),
+                      'Show Profile', style: TextStyle(color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 30),

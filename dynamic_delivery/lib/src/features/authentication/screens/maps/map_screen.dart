@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:dynamic_delivery/src/features/authentication/controllers/Address_controller.dart';
 import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapScreen extends StatefulWidget {
@@ -12,12 +15,24 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  Completer<GoogleMapController> _controller = Completer();
+  final Completer<GoogleMapController> _controller = Completer();
 
-  static const LatLng _center = const LatLng(23.0225, 72.5714);
+  static const LatLng _center = LatLng(23.0225, 72.5714);
+
+  AddressController addressController=AddressController();
+  late Future<String?> address;
+  late String? addressString;
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    addressController.fetchMostRecentDocument();
+    addressController.getAddress();
   }
 
   @override
@@ -25,15 +40,15 @@ class _MapScreenState extends State<MapScreen> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Maps Sample App'),
+          title:  const Text('Location'),
           backgroundColor:tThemeMain,
           foregroundColor: Colors.white,
         ),
         body: GoogleMap(
           onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
+          initialCameraPosition: const CameraPosition(
             target: _center,
-            zoom: 11.0,
+            zoom: 14.0,
           ),
         ),
       ),
