@@ -39,7 +39,7 @@ class _FirstScreenState extends State<FirstScreen> {
           image: tOnboardOne,
           title:tOnBoardingTitle2,
           subtitle:tOnBoardingSubTitle2,
-          bgcolor: tOnBoard2,
+          bgcolor:Colors.white,
           height: sizes.height
 
       ),),

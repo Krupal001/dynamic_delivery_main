@@ -25,9 +25,9 @@ class _FoundScreenState extends State<FoundScreen> {
   Future<void> fetchMostRecentDocument() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection("Parcels")
-          .orderBy("Date Created", descending: true)
-          .limit(1)
+          .collection("Parcels").where("Receiver Name" , isEqualTo:widget.value[1])
+         // .orderBy("Date Created", descending: true)
+         // .limit(1)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -35,6 +35,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
          parcelId= mostRecentDocument?.id;
       }
+      print("--------------------------------"+parcelId!);
     } catch (e) {
       print("Error getting most recent document: $e");
     }
@@ -92,7 +93,7 @@ class _FoundScreenState extends State<FoundScreen> {
                 children: [
                    ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const MapScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> MapScreen(value:parcelId.toString(),)));
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,

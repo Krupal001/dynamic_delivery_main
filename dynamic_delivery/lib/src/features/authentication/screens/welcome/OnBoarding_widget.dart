@@ -21,10 +21,9 @@ class OnBoardingPage extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(width: 2,color: Colors.white),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(60),
             ),
-              child: Image(image: AssetImage(model.image),height: model.height*0.40,)),
+              child: Image(image: AssetImage(model.image,),height: model.height*0.45,),),
 
            Column(
             children: [
