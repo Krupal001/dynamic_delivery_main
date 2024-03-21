@@ -1,4 +1,7 @@
+import 'package:dynamic_delivery/src/features/authentication/controllers/forget_password_controller.dart';
+import 'package:dynamic_delivery/src/utils/Validations/validations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 
 import '../../../../constants/strings.dart';
@@ -14,6 +17,7 @@ class ForgotPassMailScreen extends StatefulWidget {
 class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
   @override
   Widget build(BuildContext context) {
+    final controller=Get.put(ForgetPasswordController());
     return  SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
@@ -23,7 +27,7 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 40,),
-                const Image(image: AssetImage("assets/images/blackcircle.png",)),
+                const Image(image: AssetImage("assets/images/Mail.gif",)),
                 const Column(
                   children:[ Text(tForgotPassTitle,style:TextStyle(
                     fontFamily: "Open Sans",
@@ -37,27 +41,34 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
                 const SizedBox(height: 40,),
                 Form(child: Column(
                   children: [
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        label: Text(tEmail),
-                        hintText: tEmail,
-                        prefixIcon: Icon(Icons.mail_outlined),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(15),)),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: tThemeMain),),
-                        errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
-                        focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red)),
-                
+                    Form(
+                      key: controller.forgotPasswordFormKey,
+                      child: TextFormField(
+                        controller: controller.email,
+                        validator: Tvalidator.validateEmail,
+                        decoration: const InputDecoration(
+                          label: Text(tEmail),
+                          hintText: tEmail,
+                          prefixIcon: Icon(Icons.mail_outlined),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(15),)),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: tThemeMain),),
+                          errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red)),
+                          focusedErrorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red)),
+                                      
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20,),
                     SizedBox(
                       width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(onPressed: (){},
+                        child: ElevatedButton(onPressed: (){
+                          controller.sendPasswordResetEmail();
+                        },
                         style: ElevatedButton.styleFrom(
                             elevation: 0,
                             shape: const RoundedRectangleBorder(

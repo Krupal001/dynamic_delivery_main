@@ -76,7 +76,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     fetchMostRecentDocument();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     //fetchMostRecentDocument();
