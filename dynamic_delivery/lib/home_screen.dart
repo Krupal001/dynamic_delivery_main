@@ -2,6 +2,9 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dynamic_delivery/parcel_datail_screen.dart';
+import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,9 +20,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  final db = FirebaseFirestore.instance;
+  User? user = FirebaseAuth.instance.currentUser;
+
+  late String? merchantID;
+
+  Future<void> getData() async {
+    QuerySnapshot merchantQuery = await FirebaseFirestore.instance.collection("Delivery-agents")
+        .where("Email", isEqualTo: user?.email!).get();
+
+    if (merchantQuery.docs.isNotEmpty) {
+      merchantID = merchantQuery.docs.first.id;
+    }
+  }
+
   NotificationServices notificationServices = NotificationServices();
 
-  Future<List<String>> getDeviceTokensFromFirestore() async {
+  /*Future<List<String>> getDeviceTokensFromFirestore() async {
     List<String> tokens = [];
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('deviceTokens').get();
@@ -34,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return tokens;
-  }
+  }*/
 
 
   @override
@@ -53,40 +70,104 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Notifications'),
-
+        title: const Text('Parcel Details'),
+        backgroundColor: tThemeMain,
+        foregroundColor: Colors.white,
       ),
-      body: ElevatedButton(
-        onPressed: (){
-          getDeviceTokensFromFirestore().then((List<String> tokens) async{
-            for (var token in tokens) {
-              var data = {
-                'to': token,
-                'priority': 'high',
-                'notification': {
-                  'title': 'Parcel Request!',
-                  'body': 'Parcel is Ready for Pickup!',
-                },
-                'data':{
-                  'type':'msg',
-                  'id':'dynamic1990'
+      body: FutureBuilder<void>(
+        future: getData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: tThemeMain,),
+            );
+          } else if (merchantID == null) {
+            return const Center(
+              child: Text('No merchant ID found'),
+            );
+          } else {
+            return StreamBuilder<QuerySnapshot>(
+              stream: db.collection('Parcels').where('Agent-Id', isEqualTo: merchantID).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: tThemeMain,),
+                  );
+                } else {
+                  return ListView(
+                    children: snapshot.data!.docs.map((doc) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ParcelDetailScreen(parcel: doc)));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: SingleChildScrollView(
+                            child: Card(
+                              color: Colors.white,
+                              child: ListTile(
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(doc.id),
+                                    Text(
+                                      "status: " + doc['Status'],
+                                      style: TextStyle(
+                                        color: doc['Status'] == 'Delivered' ? Colors.green :
+                                        doc['Status'] == 'Shipment Picked Up' ? Colors.yellow :
+                                        Colors.red, // Change color based on status
+                                      ),
+                                    ),
+                                    Text("Date:" + doc['Date Created']),
+                                  ],
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () async {
+                                    final result = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Are you sure?'),
+                                        content: const Text('This action will permanently delete this data'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, true),
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (result == null || !result) {
+                                      return;
+                                    }
+
+                                    // Delete the document from Firestore
+                                    await FirebaseFirestore.instance.collection('Parcels').doc(doc.id).delete();
+                                    // Optionally, you can also remove the card from the UI without reloading the data
+                                    // This requires managing the state of the list of documents
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+
                 }
-              };
-            await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
-            body:jsonEncode(data),
-                headers:{
-              'Content-Type':'application/json; charset=UTF-8',
-            'Authorization':'key=AAAAVv7wqlg:APA91bGty2wYEMEP1Pod2qpGgpZULYzS6SVtgxn4sc3gdkwyhSybGWW-aKR7_kyYfw6oLqteYNpaIpaUGBo_0JtQo2vBnEy4DJnLyWG4qTZrso_uFtRbL05JHhSxFRoFYwyhOUo5O20x',
-            },
-            );}
-          });
-          //AuthenticationRepository.instance.logout();
+              },
+            );
+          }
         },
-        child: const Text('logout'),
       ),
-
     );
   }
 }

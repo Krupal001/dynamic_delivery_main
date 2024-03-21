@@ -27,7 +27,7 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 40,),
-                const Image(image: AssetImage("assets/images/Mail.gif",)),
+                const Image(image: AssetImage("assets/images/mail.gif",)),
                 const Column(
                   children:[ Text(tForgotPassTitle,style:TextStyle(
                     fontFamily: "Open Sans",
