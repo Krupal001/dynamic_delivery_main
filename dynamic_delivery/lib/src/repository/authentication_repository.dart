@@ -56,7 +56,7 @@ class AuthenticationRepository extends GetxController {
             backgroundColor: Colors.redAccent,
             colorText: Colors.white);
       });
-      firebaseUser.value!=null?Get.offAll(()=>const HomeScreen()):Get.offAll(()=>const WelcomeScreen());
+      firebaseUser.value!=null?Get.offAll(()=>const BottomNavBar()):Get.offAll(()=>const WelcomeScreen());
     } on FirebaseAuthException catch (e) {
       final ex = LoginWithEmailAndPasswordFailure.code(e.code);
       return ex.message;

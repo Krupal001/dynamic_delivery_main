@@ -8,6 +8,7 @@ class LoginController extends GetxController {
 
 
   final isGoogleLoading=false.obs;
+  final hidePassword=true.obs;
   /// TextField Controllers to get data from TextFields
   final email = TextEditingController();
   final password = TextEditingController();

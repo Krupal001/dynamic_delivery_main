@@ -18,6 +18,7 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
   @override
   Widget build(BuildContext context) {
     final controller=Get.put(ForgetPasswordController());
+    final formKey=GlobalKey<FormState>();
     return  SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
@@ -42,10 +43,10 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
                 Form(child: Column(
                   children: [
                     Form(
-                      key: controller.forgotPasswordFormKey,
+                      key: formKey,
                       child: TextFormField(
                         controller: controller.email,
-                        validator: Tvalidator.validateEmail,
+                        validator: (value)=>Tvalidator.validateEmail(value),
                         decoration: const InputDecoration(
                           label: Text(tEmail),
                           hintText: tEmail,
@@ -67,7 +68,10 @@ class _ForgotPassMailScreenState extends State<ForgotPassMailScreen> {
                       width: double.infinity,
                         height: 50,
                         child: ElevatedButton(onPressed: (){
-                          controller.sendPasswordResetEmail();
+                        if(formKey.currentState!.validate()){
+
+                            controller.sendPasswordResetEmail();
+                        }
                         },
                         style: ElevatedButton.styleFrom(
                             elevation: 0,

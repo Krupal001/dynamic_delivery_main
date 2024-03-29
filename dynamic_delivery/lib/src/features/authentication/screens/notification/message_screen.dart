@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dynamic_delivery/src/features/authentication/controllers/status_controller.dart';
 import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -101,6 +103,8 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(StatusController());
+    bool isParcelAccepted = false;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pickup Details'),
@@ -180,8 +184,26 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: ()  {
+                    StatusController.instance.updateStatus(mostRecentDocument?.id,"Pickup initiated");
                     updateFirestore();
+                    if (mostRecentDocument != null && mostRecentDocument!.data() != null) {
+                      Map<String, dynamic>? data = mostRecentDocument?.data() as Map<String, dynamic>?;
+                      if (data != null && data.containsKey('Agent-Id')) {
+                        isParcelAccepted = true;
+                      }
+                      if(isParcelAccepted){
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          shape: const RoundedRectangleBorder(),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: tThemeMain),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 50),
+                        );
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
@@ -198,6 +220,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       fontSize: 18,
                     ),
                   ),
+
                 ),
               )
             ],

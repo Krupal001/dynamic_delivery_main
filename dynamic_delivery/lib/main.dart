@@ -1,5 +1,6 @@
 
 import 'package:dynamic_delivery/bottom_navigationbar.dart';
+import 'package:dynamic_delivery/src/features/authentication/screens/scanner/otp_screen.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
@@ -23,18 +24,16 @@ void main() async{
  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
 
-  void main() {
+
     // Require Hybrid Composition mode on Android.
     final GoogleMapsFlutterPlatform mapsImplementation =
         GoogleMapsFlutterPlatform.instance;
     if (mapsImplementation is GoogleMapsFlutterAndroid) {
       // Force Hybrid Composition mode.
       mapsImplementation.useAndroidViewSurface = true;
-    }
+
     // ···
   }
-
-
   runApp(const MyApp());
 }
 NotificationServices notificationServices=NotificationServices();

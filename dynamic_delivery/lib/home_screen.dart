@@ -1,6 +1,3 @@
-
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_delivery/parcel_datail_screen.dart';
 import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
@@ -116,7 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       "status: " + doc['Status'],
                                       style: TextStyle(
                                         color: doc['Status'] == 'Delivered' ? Colors.green :
-                                        doc['Status'] == 'Shipment Picked Up' ? Colors.yellow :
+                                        doc['Status'] == 'In Transits' ? Colors.blueAccent :
+                                        doc['Status'] == 'Pickup initiated' ? Colors.orange :
                                         Colors.red, // Change color based on status
                                       ),
                                     ),

@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_delivery/src/features/authentication/screens/maps/map_screen.dart';
 import 'package:dynamic_delivery/src/features/authentication/screens/notification/message_screen.dart';
+import 'package:dynamic_delivery/src/features/authentication/screens/scanner/otp_screen.dart';
 import 'package:dynamic_delivery/src/utils/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+
+import '../../controllers/status_controller.dart';
 
 
 class FoundScreen extends StatefulWidget {
@@ -14,6 +19,7 @@ class FoundScreen extends StatefulWidget {
 }
 
 class _FoundScreenState extends State<FoundScreen> {
+  bool isPickupClicked = false;
   late DocumentSnapshot? mostRecentDocument;
   late String? parcelId;
   @override
@@ -43,7 +49,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
         @override
     build(BuildContext context) {
-
+    Get.put(StatusController());
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
@@ -74,16 +80,30 @@ class _FoundScreenState extends State<FoundScreen> {
           } else if (snapshot.hasError) {
           return Text("Error: ${snapshot.error}");
           } else {
-          return Center(
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            Text("Order id: ${parcelId.toString()}", style: const TextStyle(fontSize: 16)),
-            Text("Recipient Name: ${widget.value[1]}", style: const TextStyle(fontSize: 16)),
-            Text("Shipping Address: ${widget.value[2]}", style: const TextStyle(fontSize: 16)),
-            Text("Description: ${widget.value[3]}", style: const TextStyle(fontSize: 16)),
-             ],
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // Background color of the container
+              borderRadius: BorderRadius.circular(10), // Optional: Rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5), // Shadow color
+                  spreadRadius: 5, // Spread radius
+                  blurRadius: 7, // Blur radius
+                  offset: Offset(0, 3), // Shadow offset
+                ),
+              ],
+            ),
+            child: Center(
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text("Order id: ${parcelId.toString()}", style: const TextStyle(fontSize: 16)),
+              Text("Recipient Name: ${widget.value[1]}", style: const TextStyle(fontSize: 16)),
+              Text("Shipping Address: ${widget.value[2]}", style: const TextStyle(fontSize: 16)),
+              Text("Description: ${widget.value[3]}", style: const TextStyle(fontSize: 16)),
+               ],
 
+              ),
             ),
           );}}
           ),
@@ -93,12 +113,16 @@ class _FoundScreenState extends State<FoundScreen> {
                 children: [
                    ElevatedButton(
                     onPressed: () {
+                      StatusController.instance.updateStatus(parcelId,"In Transits");
+                      setState(() {
+                        isPickupClicked = true; // Update the state to enable "Delivered" button
+                      });
                       Navigator.push(context, MaterialPageRoute(builder: (context)=> MapScreen(value:parcelId.toString(),)));
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: tThemeMain,
                       foregroundColor: Colors.white,
                       side: const BorderSide(color: tThemeMain),
                       padding: const EdgeInsets.symmetric(
@@ -112,7 +136,11 @@ class _FoundScreenState extends State<FoundScreen> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                      onPressed: isPickupClicked ? () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>OTPScreen(value: parcelId.toString(),)));
+                        // Your existing code to handle the "Delivered" button press
+                      } : null,
+
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)),

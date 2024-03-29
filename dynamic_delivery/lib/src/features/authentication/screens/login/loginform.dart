@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import '../../../../constants/strings.dart';
+import '../../../../utils/Validations/validations.dart';
 import '../../../../utils/theme/colors/colors.dart';
 import '../../controllers/login_controller.dart';
 import '../forgotpass/forgotpassscreen.dart';
@@ -21,6 +23,7 @@ class LoginForm extends StatelessWidget {
         children: [
           TextFormField(
             controller: controller.email,
+            validator: (value)=>Tvalidator.validateEmail(value),
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.person_2_outlined),
               labelText: tEmail,
@@ -34,33 +37,36 @@ class LoginForm extends StatelessWidget {
               focusedErrorBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.red)),
 
-
             ),
 
           ),
           const SizedBox(height: 20,),
-          TextFormField(
-            controller: controller.password,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.fingerprint),
-              labelText: tPass,
-              hintText: tPass,
-              suffixIcon: IconButton(
-                  onPressed: null, icon: Icon(Icons.remove_red_eye_sharp)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15),)),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: tThemeMain),),
-              errorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red)),
-              focusedErrorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red)),
+          Obx(
+                ()=> TextFormField(
+              controller: controller.password,
+              obscureText: controller.hidePassword.value,
+              validator: (value)=>Tvalidator.validatePassword(value),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.lock_outline_sharp),
+                labelText: tPass,
+                hintText: tPass,
+                suffixIcon: IconButton(
+                    onPressed: () => controller.hidePassword.value=!controller.hidePassword.value,
+                    icon:Icon(controller.hidePassword.value ? Icons.remove_red_eye_sharp:LineAwesomeIcons.eye_slash)),
+                border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15),)),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: tThemeMain),),
+                errorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red)),
+                focusedErrorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red)),
 
+
+              ),
 
             ),
-
-          ),
-          const SizedBox(height: 20,),
+          ), const SizedBox(height: 20,),
           Align(alignment: Alignment.centerRight,
               child: TextButton(onPressed: () {
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const ForgotPassMailScreen()));
