@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: tThemeMain,),
+              child: Image(image: AssetImage("assets/images/loader.gif")),
             );
           } else if (merchantID == null) {
             return const Center(
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(
-                    child: CircularProgressIndicator(color: tThemeMain,),
+                    child: Image(image: AssetImage("assets/images/loader.gif")),
                   );
                 } else {
                   return ListView(

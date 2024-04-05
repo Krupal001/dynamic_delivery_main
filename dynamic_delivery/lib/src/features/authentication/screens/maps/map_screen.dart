@@ -22,9 +22,13 @@ class _MapScreenState extends State<MapScreen> {
   AddressController addressController=AddressController();
   late DocumentSnapshot? mostRecentDocument;
   late String? addressString;
+  late String? addressStringFrom;
   late double lat=0.0;
+  late double latFrom=0.0;
   late List<Marker> allMarker=[];
+  late Map<PolylineId, Polyline> polylines = {};
   late double long=0.0;
+  late double longFrom=0.0;
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
@@ -44,7 +48,7 @@ class _MapScreenState extends State<MapScreen> {
         print(";;;;;;;;;;;;;;"+snapshot.toString());
 
         addressString=snapshot['To'];//mostRecentDocument?['To'];
-
+        addressStringFrom=snapshot['From'];
         List<Location> locations = await locationFromAddress(addressString!);
         Location location = locations.first;
         setState(() {
@@ -60,14 +64,41 @@ class _MapScreenState extends State<MapScreen> {
           ];
           allMarker=_markers;
         });
+      List<Location> locationsFrom = await locationFromAddress(addressStringFrom!);
+      Location locationFrom = locationsFrom.first;
+      setState(() {
+        latFrom = locationFrom.latitude;
+        longFrom = locationFrom.longitude;
+
+        // Add a marker for the "From" address
+        allMarker.add(
+          Marker(
+            markerId: const MarkerId('2'),
+            position: LatLng(latFrom, longFrom),
+            infoWindow: const InfoWindow(title: 'Your Starting Location'),
+          ),
+        );
+      });
 
         print("========="+locations[0].toString());
 
-
+      _addPolyline(LatLng(lat, long), LatLng(latFrom, longFrom));
      // }
     } catch (e) {
       print("Error getting most recent document: $e");
     }
+  }
+  void _addPolyline(LatLng from, LatLng to) {
+    final PolylineId polylineId = PolylineId("poly");
+    final Polyline polyline = Polyline(
+      polylineId: polylineId,
+      points: [from, to],
+      color: Colors.blue,
+      width: 3,
+    );
+    setState(() {
+      polylines[polylineId] = polyline;
+    });
   }
 
   @override
@@ -97,6 +128,7 @@ class _MapScreenState extends State<MapScreen> {
             zoom: 14.0,
           ),
           markers: Set<Marker>.of(allMarker),
+          polylines: Set<Polyline>.of(polylines.values),
         ),
 
     /*FutureBuilder(
